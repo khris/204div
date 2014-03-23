@@ -62,8 +62,8 @@ HTMLActuator.prototype.addTile = function (tile) {
   this.applyClasses(wrapper, classes);
 
   inner.classList.add("tile-inner");
-  inner.textContent = tile.value >= 1 ? tile.value : tile.value != 0 ? "1" + "/" + 1/tile.value : "÷";
-  if(tile.value < 1 && tile.value != 0) inner.style.fontSize = "15px";
+  inner.textContent = tile.value >= 1 ? tile.value : tile.value > 0 ? "1" + "/" + 1/tile.value : "÷";
+  if(tile.value < 1 && tile.value > 0) inner.style.fontSize = "15px";
 
   if (tile.previousPosition) {
     // Make sure that the tile gets rendered in the previous position first
