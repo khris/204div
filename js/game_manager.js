@@ -59,7 +59,7 @@ GameManager.prototype.addStartTiles = function () {
 // Adds a tile in a random position
 GameManager.prototype.addRandomTile = function () {
   if (this.grid.cellsAvailable()) {
-    var value = Math.random() < 0.75 ? 2 : Math.random() < 0.5 ? 4 : 0;
+    var value = Math.random() < 0.75 ? 2 : Math.random() < 0.5 ? 4 : Math.random() < 0.5 ? 0 : -1;
     var tile = new Tile(this.grid.randomAvailableCell(), value);
 
     this.grid.insertTile(tile);
@@ -126,24 +126,29 @@ GameManager.prototype.move = function (direction) {
         var next      = self.grid.cellContent(positions.next);
 
         // Only one merger per row traversal?
-        if (next && next.value === tile.value && !next.mergedFrom || next && next.value == 0 || next && tile.value == 0) {
-          
-	        var merged = new Tile(positions.next, tile.value * 2);
-          if(next && next.value == 0) merged.value = tile.value / 2;
-          if(next && tile.value == 0) merged.value = next.value / 2;
-          merged.mergedFrom = [tile, next];
-
-          self.grid.insertTile(merged);
-          self.grid.removeTile(tile);
-
-          // Converge the two tiles' positions
-          tile.updatePosition(positions.next);
-
-          // Update the score
-          self.score += merged.value;
-
-          // The mighty 2048 tile
-          if (merged.value === 2048) self.won = true;
+        if (next && next.value === tile.value && !next.mergedFrom || next && next.value <= 0 || next && tile.value <= 0) {
+          if (next && next.value <= 0 && tile.value <= 0 && next.value != tile.value) {
+            self.grid.removeTile(tile);
+            self.grid.removeTile(next);
+            moved = true;
+          } else {
+            var merged = new Tile(positions.next, tile.value * 2);
+            if(next && next.value == 0) merged.value = tile.value / 2;
+            if(next && tile.value == 0) merged.value = next.value / 2;
+            merged.mergedFrom = [tile, next];
+  
+            self.grid.insertTile(merged);
+            self.grid.removeTile(tile);
+  
+            // Converge the two tiles' positions
+            tile.updatePosition(positions.next);
+  
+            // Update the score
+            self.score += merged.value;
+  
+            // The mighty 2048 tile
+            if (merged.value === 2048) self.won = true;
+          }
         } else {
           self.moveTile(tile, positions.farthest);
         }
@@ -232,7 +237,7 @@ GameManager.prototype.tileMatchesAvailable = function () {
 
           var other  = self.grid.cellContent(cell);
 
-          if (other && other.value === tile.value || other && other.value == 0 || tile.value == 0) {
+          if (other && other.value === tile.value || other && other.value <= 0 || tile.value <= 0) {
             return true; // These two tiles can be merged
           }
         }
